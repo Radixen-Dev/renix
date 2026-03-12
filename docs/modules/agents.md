@@ -32,6 +32,18 @@ The user never interacts with subagents directly. They run silently, return resu
   - Reads: `messages`
   - Writes: `messages` (appended with tool calls and results)
 
+### Step 10 Verification
+
+- `ToolUseAgent` now implements a working internal ToolNode loop in `modules/agents/tool_use_agent.py`:
+  - builds LangChain tools from `modules/tools/__init__.py`
+  - initializes tool-capable ChatOpenAI client from `config.yaml` (`llm.base_url`, `llm.model`)
+  - runs loop topology: `llm_call -> tools -> llm_call` until no tool calls remain
+  - returns a compiled subgraph for parent-graph registration in step 14
+- Unit coverage in `tests/unit/test_agent_registry.py` now verifies:
+  - AGENTS registry is non-empty and unique by name
+  - all registered entries implement `SubagentPlugin`
+  - `ToolUseAgent.build()` returns a compiled graph object
+
 <!-- TODO (step 16): Add Mermaid subgraph topology diagram. -->
 
 ---
