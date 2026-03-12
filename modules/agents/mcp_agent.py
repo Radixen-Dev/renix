@@ -13,7 +13,7 @@ from __future__ import annotations
 from langgraph.graph import StateGraph
 
 from core.interfaces import SubagentPlugin
-from core.utils import AgentError, get_logger
+from core.utils import get_logger
 
 logger = get_logger(__name__)
 

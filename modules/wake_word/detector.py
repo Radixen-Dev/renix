@@ -8,7 +8,7 @@ fires above the configured confidence threshold.
 from __future__ import annotations
 
 from core.interfaces import WakeWordDetector
-from core.utils import WakeWordError, get_logger
+from core.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -67,4 +67,6 @@ class OpenWakeWordDetector(WakeWordDetector):
                 while waiting.
         """
         # Implemented in step 6 — feat(wake-word): detector
-        raise NotImplementedError("OpenWakeWordDetector.wait_for_detection implemented in step 6")
+        raise NotImplementedError(
+            "OpenWakeWordDetector.wait_for_detection implemented in step 6"
+        )

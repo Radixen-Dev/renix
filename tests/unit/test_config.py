@@ -15,8 +15,8 @@ from __future__ import annotations
 
 import os
 import textwrap
-from pathlib import Path
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 
@@ -100,14 +100,18 @@ class TestLoadConfig:
         with pytest.raises(utils_module.ConfigError, match="mapping"):
             utils_module.load_config(str(cfg_file))
 
-    def test_raises_config_error_for_missing_required_sections(self, tmp_path: Path) -> None:
+    def test_raises_config_error_for_missing_required_sections(
+        self, tmp_path: Path
+    ) -> None:
         """load_config() must raise ConfigError when required sections are absent."""
         cfg_file = tmp_path / "config.yaml"
         cfg_file.write_text("llm:\n  base_url: x\n  model: y\n", encoding="utf-8")
         with pytest.raises(utils_module.ConfigError, match="missing required section"):
             utils_module.load_config(str(cfg_file))
 
-    def test_raises_config_error_when_llm_base_url_missing(self, tmp_path: Path) -> None:
+    def test_raises_config_error_when_llm_base_url_missing(
+        self, tmp_path: Path
+    ) -> None:
         """load_config() must raise ConfigError when llm.base_url is absent."""
         yaml_no_url = MINIMAL_VALID_YAML.replace(
             '  base_url: "http://localhost:1234/v1"\n', ""

@@ -16,7 +16,6 @@ from abc import ABC, abstractmethod
 
 from langgraph.graph import StateGraph
 
-
 # ---------------------------------------------------------------------------
 # Plugin interfaces
 # ---------------------------------------------------------------------------

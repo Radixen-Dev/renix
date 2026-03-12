@@ -9,7 +9,7 @@ Security note: Transcribed content must never be logged at INFO level or above.
 from __future__ import annotations
 
 from core.interfaces import Transcriber
-from core.utils import TranscriptionError, get_logger
+from core.utils import get_logger
 
 logger = get_logger(__name__)
 

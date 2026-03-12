@@ -11,7 +11,7 @@ import logging
 import logging.handlers
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Exception hierarchy
@@ -121,7 +121,9 @@ def configure_logging(
         try:
             log_path.parent.mkdir(parents=True, exist_ok=True)
         except OSError as exc:
-            raise ConfigError(f"Cannot create log directory '{log_path.parent}': {exc}") from exc
+            raise ConfigError(
+                f"Cannot create log directory '{log_path.parent}': {exc}"
+            ) from exc
 
         file_handler = logging.handlers.RotatingFileHandler(
             log_path,
@@ -140,7 +142,7 @@ def configure_logging(
 # ---------------------------------------------------------------------------
 
 # Populated by load_config(); accessed project-wide via get_config().
-_config: Optional[dict[str, Any]] = None
+_config: dict[str, Any] | None = None
 
 
 def load_config(config_path: str = "config/config.yaml") -> dict[str, Any]:
@@ -180,17 +182,20 @@ def load_config(config_path: str = "config/config.yaml") -> dict[str, Any]:
         )
 
     try:
-        import yaml  # imported here to keep top-level imports lean
+        import yaml  # type: ignore[import-untyped]
         with resolved.open("r", encoding="utf-8") as fh:
             raw: object = yaml.safe_load(fh)
     except OSError as exc:
-        raise ConfigError(f"Cannot read configuration file '{resolved}': {exc}") from exc
+        raise ConfigError(
+            f"Cannot read configuration file '{resolved}': {exc}"
+        ) from exc
     except Exception as exc:
         raise ConfigError(f"Invalid YAML in '{resolved}': {exc}") from exc
 
     if not isinstance(raw, dict):
         raise ConfigError(
-            f"Configuration file '{resolved}' must be a YAML mapping, got {type(raw).__name__}."
+            f"Configuration file '{resolved}' must be a YAML mapping, "
+            f"got {type(raw).__name__}."
         )
 
     _validate_config(raw)
@@ -210,7 +215,9 @@ def get_config() -> dict[str, Any]:
         ConfigError: If called before ``load_config()``.
     """
     if _config is None:
-        raise ConfigError("Configuration has not been loaded. Call load_config() first.")
+        raise ConfigError(
+            "Configuration has not been loaded. Call load_config() first."
+        )
     return _config
 
 
@@ -276,7 +283,7 @@ def _load_dotenv(dotenv_path: str = ".env") -> None:
         return
 
     try:
-        from dotenv import load_dotenv  # type: ignore[import-untyped]
+        from dotenv import load_dotenv
         load_dotenv(resolved, override=False)
     except ImportError:
         # python-dotenv not installed; parse the file manually.
