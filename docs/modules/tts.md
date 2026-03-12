@@ -28,3 +28,17 @@ tts:
   volume: 1.0        # 0.0–1.0
   voice_id: null     # null = system default, or platform voice ID string
 ```
+
+### Step 8 Verification
+
+- `Pyttsx3Speaker` now provides complete behavior in `modules/tts/speaker.py`:
+  - constructor validation for `rate` and `volume`
+  - pyttsx3 engine initialization and property application (`rate`, `volume`, optional `voice`)
+  - `speak()` playback execution for non-empty text
+  - backend initialization and playback failures wrapped as `TTSError`
+- Unit coverage in `tests/unit/test_speaker.py` verifies:
+  - engine init and property application
+  - normal `speak()` behavior
+  - empty-text no-op behavior
+  - invalid config validation
+  - init and playback error wrapping
