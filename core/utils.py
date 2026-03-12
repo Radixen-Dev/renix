@@ -11,10 +11,7 @@ import logging
 import logging.handlers
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
-
-if TYPE_CHECKING:
-    pass
+from typing import Any, Optional
 
 # ---------------------------------------------------------------------------
 # Exception hierarchy
@@ -149,27 +146,62 @@ _config: Optional[dict[str, Any]] = None
 def load_config(config_path: str = "config/config.yaml") -> dict[str, Any]:
     """Load and validate the YAML configuration file.
 
-    Also reads environment variables from a ``.env`` file if present, making
-    secrets available as ``os.environ`` entries.
+    Also reads environment variables from a ``.env`` file at the project root
+    if it exists, making secrets available as ``os.environ`` entries.
+
+    The configuration is cached after the first call. Subsequent calls return
+    the cached dict without re-reading from disk.
 
     Args:
-        config_path: Path to ``config.yaml``, relative to project root or absolute.
+        config_path: Path to ``config.yaml``, relative to CWD or absolute.
 
     Returns:
         The fully parsed configuration dictionary.
 
     Raises:
-        ConfigError: If the file is missing, unreadable, or fails schema
-            validation.
+        ConfigError: If the file is missing, unreadable, contains invalid YAML,
+            or fails required-field validation.
     """
-    # Implemented in step 2 — feat(config): config loading and validation
-    raise NotImplementedError("load_config implemented in step 2")
+    global _config
+    if _config is not None:
+        return _config
+
+    # Load .env secrets into os.environ before anything else.
+    _load_dotenv()
+
+    resolved = Path(config_path)
+    if not resolved.is_absolute():
+        resolved = Path.cwd() / resolved
+
+    if not resolved.exists():
+        raise ConfigError(
+            f"Configuration file not found: '{resolved}'. "
+            "Create it from config/config.yaml."
+        )
+
+    try:
+        import yaml  # imported here to keep top-level imports lean
+        with resolved.open("r", encoding="utf-8") as fh:
+            raw: object = yaml.safe_load(fh)
+    except OSError as exc:
+        raise ConfigError(f"Cannot read configuration file '{resolved}': {exc}") from exc
+    except Exception as exc:
+        raise ConfigError(f"Invalid YAML in '{resolved}': {exc}") from exc
+
+    if not isinstance(raw, dict):
+        raise ConfigError(
+            f"Configuration file '{resolved}' must be a YAML mapping, got {type(raw).__name__}."
+        )
+
+    _validate_config(raw)
+    _config = raw
+    return _config
 
 
 def get_config() -> dict[str, Any]:
     """Return the already-loaded configuration dictionary.
 
-    Must be called after ``load_config()`` at startup.
+    Must be called after ``load_config()`` at application startup.
 
     Returns:
         The loaded config dict.
@@ -180,3 +212,102 @@ def get_config() -> dict[str, Any]:
     if _config is None:
         raise ConfigError("Configuration has not been loaded. Call load_config() first.")
     return _config
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
+
+#: Top-level keys that must be present in config.yaml.
+_REQUIRED_TOP_LEVEL_KEYS: tuple[str, ...] = (
+    "llm",
+    "orchestrator",
+    "stt",
+    "tts",
+    "wake_word",
+    "memory",
+    "audio",
+    "logging",
+)
+
+
+def _validate_config(cfg: dict[str, Any]) -> None:
+    """Assert that all required top-level sections are present.
+
+    Args:
+        cfg: Parsed YAML dict to validate.
+
+    Raises:
+        ConfigError: If any required top-level key is absent.
+    """
+    missing = [k for k in _REQUIRED_TOP_LEVEL_KEYS if k not in cfg]
+    if missing:
+        raise ConfigError(
+            f"Configuration is missing required section(s): {', '.join(missing)}. "
+            "Refer to config/config.yaml for the full schema."
+        )
+
+    # LLM section must provide base_url and model.
+    llm = cfg.get("llm", {})
+    for field in ("base_url", "model"):
+        if not llm.get(field):
+            raise ConfigError(
+                f"'llm.{field}' is required in config.yaml but is missing or empty."
+            )
+
+
+def _load_dotenv(dotenv_path: str = ".env") -> None:
+    """Load a ``.env`` file into ``os.environ`` if it exists.
+
+    Uses python-dotenv when available. Silently skips if the file does not
+    exist (not all environments require a .env file).
+
+    Args:
+        dotenv_path: Path to the .env file, relative to CWD or absolute.
+
+    Raises:
+        ConfigError: If the .env file exists but cannot be parsed.
+    """
+    resolved = Path(dotenv_path)
+    if not resolved.is_absolute():
+        resolved = Path.cwd() / resolved
+
+    if not resolved.exists():
+        return
+
+    try:
+        from dotenv import load_dotenv  # type: ignore[import-untyped]
+        load_dotenv(resolved, override=False)
+    except ImportError:
+        # python-dotenv not installed; parse the file manually.
+        _parse_dotenv_manually(resolved)
+    except Exception as exc:
+        raise ConfigError(f"Failed to load .env file '{resolved}': {exc}") from exc
+
+
+def _parse_dotenv_manually(path: Path) -> None:
+    """Minimal .env parser used when python-dotenv is not installed.
+
+    Handles ``KEY=value`` and ``KEY="value"`` lines. Ignores comments and
+    blank lines. Does NOT override existing environment variables.
+
+    Args:
+        path: Absolute path to the .env file.
+
+    Raises:
+        ConfigError: If the file cannot be read.
+    """
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise ConfigError(f"Cannot read .env file '{path}': {exc}") from exc
+
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, raw_value = line.partition("=")
+        key = key.strip()
+        value = raw_value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
