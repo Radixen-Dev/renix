@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from langgraph.types import RunnableConfig
+from langchain_core.runnables import RunnableConfig
 
 from core.state import GraphState
 from core.utils import get_logger
