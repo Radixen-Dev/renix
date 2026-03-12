@@ -12,6 +12,14 @@ The audio module handles device autodiscovery and microphone recording. It is th
 
 `discover_devices()` resolves device indices from config values (name string, integer index, or `null` for system default), validates that the device supports the required sample rate, and returns a `DeviceConfig` dataclass.
 
+### Step 5 Verification
+
+- `tests/unit/test_device_manager.py` validates:
+  - default fallback resolution when `input_device`/`output_device` are `null`
+  - missing device-name handling (`AudioError`)
+  - `sample_rate` and `chunk_size` propagation into `DeviceConfig`
+  - stable `DeviceConfig` field contract
+
 ## recorder.py
 
 `SoundDeviceRecorder` implements `AudioRecorder`. Called by the `listen` node after wake-word detection. Returns raw 16 kHz mono PCM bytes.
