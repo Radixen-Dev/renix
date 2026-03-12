@@ -1,0 +1,3 @@
+# Runtime data directory.
+# Stores: memory.db (long-term memory SQLite), session.json (active thread_id).
+# This directory is NOT committed to git (see .gitignore).

@@ -1,0 +1,3 @@
+# Log output directory.
+# Log files are written here when logging.log_to_file is true in config.yaml.
+# This directory is NOT committed to git (see .gitignore).

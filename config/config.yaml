@@ -1,0 +1,51 @@
+# All non-secret configuration for Renix.
+# Secrets (API keys) go in .env — never here.
+# See config/.env.example for the required environment variables.
+
+llm:
+  base_url: "http://localhost:1234/v1"    # OpenAI-compatible endpoint (e.g. LM Studio)
+  model: "mistral-7b-instruct"
+  system_prompt: "You are Renix, a concise voice assistant. Responses are spoken aloud — keep them short and natural."
+  max_tokens: 512
+  temperature: 0.7
+
+orchestrator:
+  proactive_enabled: true
+  proactive_schedule: "0 * * * *"         # cron — hourly by default
+  proactive_prompt: "Check if there is anything timely or useful to tell the user."
+
+stt:
+  model_size: "base"                      # tiny | base | small | medium | large
+  device: "cpu"                           # cpu | cuda
+  language: "en"
+
+tts:
+  rate: 175
+  volume: 1.0
+  voice_id: null                          # null = system default
+
+wake_word:
+  model_path: "hey_renix"
+  threshold: 0.5
+  cooldown_seconds: 2
+
+memory:
+  long_term_enabled: true
+  db_path: "data/memory.db"
+
+audio:
+  input_device: null                      # null = system default, or device name/index
+  output_device: null
+  sample_rate: 16000
+  chunk_size: 1024
+
+tools:
+  weather:
+    base_url: "https://api.openweathermap.org/data/2.5"
+  mcp:
+    servers: []                           # list of MCP server URLs
+
+logging:
+  level: "INFO"
+  log_to_file: true
+  log_file: "logs/renix.log"
