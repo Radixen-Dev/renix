@@ -6,7 +6,7 @@ No code outside a node function may create or modify state.
 
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
@@ -38,19 +38,21 @@ class GraphState(TypedDict):
     """
 
     # Conversation
-    messages: Annotated[list, add_messages]  # full message history (LangChain messages)
-    transcript: Optional[str]  # current user utterance, set by transcribe
-    response: Optional[str]  # final text to speak, set by orchestrator
+    messages: Annotated[
+        list[object], add_messages
+    ]  # full message history (LangChain messages)
+    transcript: str | None  # current user utterance, set by transcribe
+    response: str | None  # final text to speak, set by orchestrator
 
     # Routing
-    intent: Optional[str]  # classified intent label, set by route
-    active_subagent: Optional[str]  # name of subagent currently executing
+    intent: str | None  # classified intent label, set by route
+    active_subagent: str | None  # name of subagent currently executing
 
     # Audio
-    audio_bytes: Optional[bytes]  # raw PCM from recorder — CLEARED after STT
+    audio_bytes: bytes | None  # raw PCM from recorder — CLEARED after STT
 
     # Proactive initiation
-    proactive_message: Optional[str]  # set by scheduler to bypass listen/transcribe
+    proactive_message: str | None  # set by scheduler to bypass listen/transcribe
 
     # Error propagation
-    error: Optional[str]  # last error message; orchestrator reads this
+    error: str | None  # last error message; orchestrator reads this

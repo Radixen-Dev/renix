@@ -30,7 +30,7 @@ class TestGraphReactiveTurn:
         pytest.skip("Implemented in step 14 — feat(core): parent graph")
 
     def test_response_populated_after_orchestrator(self) -> None:
-        """state['response'] must be non-None when orchestrator produces a final answer."""
+        """state['response'] must be non-None after orchestrator finalizes."""
         pytest.skip("Implemented in step 14 — feat(core): parent graph")
 
     def test_speaker_called_with_response_text(self) -> None:

@@ -7,10 +7,8 @@ output device.
 
 from __future__ import annotations
 
-from typing import Optional
-
 from core.interfaces import Speaker
-from core.utils import TTSError, get_logger
+from core.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -31,7 +29,7 @@ class Pyttsx3Speaker(Speaker):
         self,
         rate: int = 175,
         volume: float = 1.0,
-        voice_id: Optional[str] = None,
+        voice_id: str | None = None,
     ) -> None:
         """Initialise the pyttsx3 engine with the specified settings.
 

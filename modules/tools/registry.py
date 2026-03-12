@@ -6,12 +6,10 @@ LangChain tools bound to its internal ``ToolNode``.
 
 from __future__ import annotations
 
-from typing import Any
-
 from langchain_core.tools import BaseTool
 
 from core.interfaces import ToolPlugin
-from core.utils import ToolError, get_logger
+from core.utils import get_logger
 
 logger = get_logger(__name__)
 

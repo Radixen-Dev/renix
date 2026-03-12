@@ -30,5 +30,5 @@ class TestDiscoverDevices:
         pytest.skip("Implemented in step 5 — feat(audio): device autodiscovery")
 
     def test_device_config_fields(self) -> None:
-        """DeviceConfig must expose input_device, output_device, sample_rate, chunk_size."""
+        """DeviceConfig must expose device, sample_rate, and chunk_size fields."""
         pytest.skip("Implemented in step 5 — feat(audio): device autodiscovery")

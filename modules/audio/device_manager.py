@@ -15,11 +15,9 @@ from __future__ import annotations
 
 # Implemented in step 5 — feat(audio): device autodiscovery
 # Platform-specific logic for Windows and Raspberry Pi OS goes here.
-
 from dataclasses import dataclass
-from typing import Optional
 
-from core.utils import AudioError, get_logger
+from core.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -37,15 +35,15 @@ class DeviceConfig:
         chunk_size: Frames per buffer chunk (default 1024).
     """
 
-    input_device: Optional[int]
-    output_device: Optional[int]
+    input_device: int | None
+    output_device: int | None
     sample_rate: int = 16000
     chunk_size: int = 1024
 
 
 def discover_devices(
-    input_device: Optional[str | int] = None,
-    output_device: Optional[str | int] = None,
+    input_device: str | int | None = None,
+    output_device: str | int | None = None,
     sample_rate: int = 16000,
     chunk_size: int = 1024,
 ) -> DeviceConfig:

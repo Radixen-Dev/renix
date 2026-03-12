@@ -7,7 +7,7 @@ Called exclusively by the ``listen`` node after wake-word detection.
 from __future__ import annotations
 
 from core.interfaces import AudioRecorder
-from core.utils import AudioError, get_logger
+from core.utils import get_logger
 from modules.audio.device_manager import DeviceConfig
 
 logger = get_logger(__name__)

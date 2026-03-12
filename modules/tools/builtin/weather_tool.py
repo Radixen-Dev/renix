@@ -7,7 +7,7 @@ Requires ``WEATHER_API_KEY`` in ``.env``. The API endpoint is configured in
 from __future__ import annotations
 
 from core.interfaces import ToolPlugin
-from core.utils import ToolError, get_logger
+from core.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -29,12 +29,12 @@ class WeatherTool(ToolPlugin):
         "Use this when the user asks about weather conditions."
     )
 
-    def run(self, location: str = "", **kwargs: object) -> str:
+    def run(self, **kwargs: object) -> str:
         """Fetch current weather for the specified location.
 
         Args:
-            location: City name or location string (e.g. ``"London, UK"``).
-            **kwargs: Additional parameters are ignored.
+            **kwargs: Tool arguments. Uses optional ``location`` key for the
+                target city/location string (e.g. ``"London, UK"``).
 
         Returns:
             Plain-text weather summary, e.g.
@@ -44,5 +44,6 @@ class WeatherTool(ToolPlugin):
             ToolError: If the API key is missing, the request fails, or the
                 response cannot be parsed.
         """
+        _location = str(kwargs.get("location", ""))
         # Implemented in step 9 — feat(tools): registry + builtins
         raise NotImplementedError("WeatherTool.run implemented in step 9")
