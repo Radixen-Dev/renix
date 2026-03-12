@@ -18,3 +18,15 @@ wake_word:
   threshold: 0.5            # Confidence score 0.0–1.0
   cooldown_seconds: 2       # Minimum gap between detections
 ```
+
+### Step 6 Verification
+
+- `OpenWakeWordDetector` now provides complete lifecycle behavior:
+  - `start()` loads the openWakeWord model and opens a `sounddevice.InputStream`
+  - `wait_for_detection()` blocks until score >= threshold while enforcing cooldown
+  - `stop()` closes stream resources and resets internal state
+- Backend and inference failures are normalized to `WakeWordError`.
+- Unit coverage in `tests/unit/test_wake_word_detector.py` verifies:
+  - startup/shutdown lifecycle behavior
+  - threshold-based blocking detection
+  - startup failure wrapping into `WakeWordError`
