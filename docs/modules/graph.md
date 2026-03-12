@@ -24,6 +24,12 @@
 | `proactive_message` | `Optional[str]` | `scheduler` | Message for proactive turn |
 | `error` | `Optional[str]` | Any node on failure | Last error string |
 
+### Step 3 Verification
+
+- `tests/unit/test_state.py` validates required `GraphState` fields.
+- The tests verify `audio_bytes` supports `None` (clear-after-STT rule).
+- The tests verify `messages` carries `add_messages` reducer metadata.
+
 ---
 
 ## Nodes
