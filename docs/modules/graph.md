@@ -30,6 +30,11 @@
 - The tests verify `audio_bytes` supports `None` (clear-after-STT rule).
 - The tests verify `messages` carries `add_messages` reducer metadata.
 
+### Step 4 Verification
+
+- `tests/unit/test_interfaces.py` validates all core plugin/I-O interface
+	classes remain abstract and expose the required methods.
+
 ---
 
 ## Nodes
