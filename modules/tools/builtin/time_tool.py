@@ -5,6 +5,8 @@ A simple built-in tool that requires no external API calls or secrets.
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from core.interfaces import ToolPlugin
 from core.utils import get_logger
 
@@ -36,5 +38,6 @@ class TimeTool(ToolPlugin):
         Returns:
             Current local datetime string, e.g. ``"Wednesday, 12 March 2026, 14:35"``.
         """
-        # Implemented in step 9 — feat(tools): registry + builtins
-        raise NotImplementedError("TimeTool.run implemented in step 9")
+        del kwargs
+        now = datetime.now().astimezone()
+        return now.strftime("%A, %d %B %Y, %H:%M %Z")

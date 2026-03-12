@@ -6,10 +6,12 @@ LangChain tools bound to its internal ``ToolNode``.
 
 from __future__ import annotations
 
-from langchain_core.tools import BaseTool
+from typing import Any
+
+from langchain_core.tools import BaseTool, StructuredTool
 
 from core.interfaces import ToolPlugin
-from core.utils import get_logger
+from core.utils import ToolError, get_logger
 
 logger = get_logger(__name__)
 
@@ -30,5 +32,43 @@ def build_langchain_tools(plugins: list[ToolPlugin]) -> list[BaseTool]:
     Raises:
         ToolError: If any plugin fails validation or schema generation.
     """
-    # Implemented in step 9 — feat(tools): registry + builtins
-    raise NotImplementedError("build_langchain_tools implemented in step 9")
+    if not plugins:
+        return []
+
+    built: list[BaseTool] = []
+    seen_names: set[str] = set()
+
+    for plugin in plugins:
+        name = getattr(plugin, "name", "")
+        description = getattr(plugin, "description", "")
+        if not isinstance(name, str) or not name.strip():
+            raise ToolError(
+                f"Tool plugin {plugin.__class__.__name__} has an empty name."
+            )
+        if not isinstance(description, str) or not description.strip():
+            raise ToolError(
+                f"Tool plugin '{name}' has an empty description."
+            )
+        if name in seen_names:
+            raise ToolError(f"Duplicate tool name '{name}' in tool registry.")
+
+        seen_names.add(name)
+        built.append(_plugin_to_base_tool(plugin))
+
+    logger.info("Built %d tool(s) for ToolNode", len(built))
+    return built
+
+
+def _plugin_to_base_tool(plugin: ToolPlugin) -> BaseTool:
+    """Wrap a ToolPlugin.run call as a LangChain @tool BaseTool."""
+    name = plugin.name
+    description = plugin.description
+
+    def _wrapped_tool(**kwargs: Any) -> str:
+        return plugin.run(**kwargs)
+
+    return StructuredTool.from_function(
+        func=_wrapped_tool,
+        name=name,
+        description=description,
+    )

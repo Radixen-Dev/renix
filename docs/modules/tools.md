@@ -37,3 +37,18 @@ Tools implement `ToolPlugin` from `core/interfaces.py`. They are registered in `
 - **Parameters:** `location` (str) — city name or location string.
 - **Returns:** Plain-text weather summary.
 - **Configuration:** `WEATHER_API_KEY` in `.env`; base URL in `config.yaml` under `tools.weather.base_url`.
+
+### Step 9 Verification
+
+- `modules/tools/registry.py` now implements plugin-to-LangChain conversion:
+	- validates tool names/descriptions
+	- rejects duplicate tool names
+	- wraps each `ToolPlugin.run` as a LangChain `@tool` callable
+- Built-in tools now have concrete behavior:
+	- `TimeTool.run()` returns a formatted local datetime string
+	- `WeatherTool.run()` reads `WEATHER_API_KEY`, resolves base URL from config, fetches weather JSON, and returns a concise summary
+- Unit coverage in `tests/unit/test_tool_registry.py` verifies:
+	- empty/non-empty registry conversion behavior
+	- name/description preservation and duplicate-name rejection
+	- TOOLS registry includes built-ins
+	- weather tool validation and success path formatting
