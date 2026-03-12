@@ -22,3 +22,17 @@ stt:
   device: "cpu"        # cpu | cuda
   language: "en"       # BCP-47 language code; omit for auto-detection
 ```
+
+### Step 7 Verification
+
+- `WhisperTranscriber` now provides complete behavior in `modules/stt/transcriber.py`:
+  - model loading in constructor with `TranscriptionError` wrapping
+  - PCM16-byte to float32 waveform conversion for faster-whisper input
+  - `transcribe()` returns joined segment text and handles empty input
+  - transcripts are never logged at INFO level or above
+- Unit coverage in `tests/unit/test_transcriber.py` verifies:
+  - model initialization parameters
+  - successful transcription aggregation
+  - empty input handling
+  - model-load and inference failure wrapping
+  - invalid odd-length PCM input handling
