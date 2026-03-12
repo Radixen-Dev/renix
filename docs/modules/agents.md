@@ -57,6 +57,19 @@ The user never interacts with subagents directly. They run silently, return resu
   - Reads: `messages`
   - Writes: `messages` (appended with memory recall results)
 
+### Step 11 Verification
+
+- `MemoryAgent` now implements a SQLite-backed long-term memory subgraph in `modules/agents/memory_agent.py`:
+  - loads memory config from `config.yaml` (`memory.long_term_enabled`, `memory.db_path`)
+  - initializes SQLite schema (`memories` table) automatically
+  - executes `classify -> store|recall -> END` flow
+  - persists memory text on store requests and returns recall summaries on query requests
+  - supports explicit disabled mode response when long-term memory is turned off
+- Unit coverage in `tests/unit/test_memory_agent.py` verifies:
+  - SQLite add/search roundtrip behavior
+  - end-to-end store-then-recall graph behavior
+  - disabled-memory branch behavior
+
 <!-- TODO (step 16): Add Mermaid subgraph topology diagram. -->
 
 ---
