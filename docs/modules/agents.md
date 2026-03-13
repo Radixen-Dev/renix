@@ -78,9 +78,30 @@ The user never interacts with subagents directly. They run silently, return resu
 
 - **Intent labels:** `mcp`
 - **Purpose:** Proxies tool calls to configured MCP servers.
-- **Tools bound:** Dynamically loaded from MCP server manifests at startup.
+- **Tools bound:** Dynamically loaded from MCP server manifests at startup via `GET {server_url}/tools`.
 - **State contract:**
   - Reads: `messages`
   - Writes: `messages` (appended with MCP tool results)
+
+### Step 12 Verification
+
+- `MCPAgent` implements a full MCP proxy subgraph in `modules/agents/mcp_agent.py`:
+  - reads server URLs from `config.yaml` (`tools.mcp.servers`)
+  - discovers tools at startup via `GET {server_url}/tools` (JSON array of `{name, description}`)
+  - invokes tools via `POST {server_url}/tools/{tool_name}` with kwargs as JSON body
+  - wraps each discovered tool as a LangChain `StructuredTool` using `_make_proxy_tool`
+  - qualifies tool names as `{server_slug}__{tool_name}` to avoid collisions across servers
+  - runs the same LLM-ToolNode loop as `ToolUseAgent`: `llm_call → tools → llm_call` until no tool calls remain
+  - falls back to a `mcp_disabled` single-node subgraph (graceful notice) when no servers are configured or all servers are unreachable at build time
+  - uses only stdlib `urllib` — no additional runtime dependencies
+- Unit coverage in `tests/unit/test_mcp_agent.py` verifies:
+  - `_url_slug` slug generation
+  - `_mcp_disabled_node` notice content
+  - `_fetch_tool_manifest` via real local HTTP server (empty list, tool entries, unreachable)
+  - `_invoke_mcp_tool` via real local HTTP server (`result`, `output` field fallbacks, unreachable)
+  - `_make_proxy_tool` name and description propagation
+  - `MCPAgent.build()` no-servers path returns a compiled graph and invokes the disabled notice
+  - `MCPAgent.build()` unreachable-server path falls back gracefully to disabled subgraph
+  - `MCPAgent.build()` with mocked manifest returns a compiled graph (or raises `AgentError` when `langchain-openai` is absent)
 
 <!-- TODO (step 16): Add Mermaid subgraph topology diagram. -->
